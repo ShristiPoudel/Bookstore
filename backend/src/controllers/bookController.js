@@ -70,6 +70,47 @@ export default class BookController {
       res.json({ success: false, message: "Book id not provided" });
   }
 
+  //search-book
+
+  async searchBook(req,res){
+   const{q}=  req.query
+
+   if(q){
+   const data = await bookModel.findAll({
+    where:{
+      [Op.or]:{
+        name:{
+        [Op.like]:`%${q}%`,
+        },
+        author:{
+          [Op.like]:`%${q}%`,
+        },
+      },
+    },
+
+   });
+   console.log(data);
+   res.json(data);
+  }
+
+  else {
+   res.json({success:false, message:"Empty query search string. "})
+  }
+
+  }
+
+
+
+  async getBooks(req, res) {
+    let limit = parseInt(req.query.limit) || 20;
+  
+    const data = await bookModel.findAll({
+      limit,
+    });
+  
+    res.json(data);
+  }
+  
  
 
 

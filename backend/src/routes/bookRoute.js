@@ -35,5 +35,10 @@ router.put("/update/:id", bookController.updateBook);
 
 router.delete("/delete/:id", bookController.deleteBook);
 
+router.get("/search/all",bookController.searchBook);
+
+//book list ?limit=20
+router.get("/", bookController.getBooks);
+
 
 export default router;
