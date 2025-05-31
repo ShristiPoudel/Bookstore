@@ -1,5 +1,8 @@
 import bookModel from "../models/bookModel.js";
 import { Op } from "sequelize";
+import textConstants from "../constants/textConstant.js";
+import urlConstants from "../constants/urlConstants.js";
+
 
 export default class BookController {
   async addBook(req, res, imageName) {
@@ -26,7 +29,7 @@ export default class BookController {
       const data = await bookModel.findByPk(id);
       data ? res.json(data) : res.json([]);
     } else
-      res.json({ success: false, message:"book id not provided" });
+      res.json({ success: false, message: textConstants.BOOK_ID_NOT_PROVIDED });
   }
 
   //
@@ -46,7 +49,7 @@ export default class BookController {
         res.json({ success: false, message: "Couldn't update book" });
       }
     } else
-      res.json({ success: false, message: "book id not provided" });
+      res.json({ success: false, message: textConstants.BOOK_ID_NOT_PROVIDED });
   }
 
   //delete
@@ -67,51 +70,58 @@ export default class BookController {
         res.json({ success: false, message: "Couldn't delete book" });
       }
     } else
-      res.json({ success: false, message: "Book id not provided" });
+      res.json({ success: false, message: textConstants.BOOK_ID_NOT_PROVIDED });
   }
 
   //search-book
 
-  async searchBook(req,res){
-   const{q}=  req.query
+  async searchBook(req, res) {
+    const { q } = req.query;
 
-   if(q){
-   const data = await bookModel.findAll({
-    where:{
-      [Op.or]:{
-        name:{
-        [Op.like]:`%${q}%`,
+    if (q) {
+      const data = await bookModel.findAll({
+        where: {
+          [Op.or]: {
+            name: {
+              [Op.like]: `%${q}%`,
+            },
+            author: {
+              [Op.like]: `%${q}%`,
+            },
+          },
         },
-        author:{
-          [Op.like]:`%${q}%`,
-        },
-      },
-    },
+        raw: true,
+      });
+      console.log(data);
 
-   });
-   console.log(data);
-   res.json(data);
+      for (let d of data) {
+        d.image = urlConstants.IMG_PATH_URL + d.image;
+        console.log(d.image);
+      }
+      res.json(data);
+    } else {
+      res.json({ success: false, message: "Empty query search string. " });
+    }
   }
-
-  else {
-   res.json({success:false, message:"Empty query search string. "})
-  }
-
-  }
-
-
 
   async getBooks(req, res) {
     let limit = parseInt(req.query.limit) || 20;
-  
-    const data = await bookModel.findAll({
-      limit,
-    });
-  
-    res.json(data);
+    try {
+      const data = await bookModel.findAll({
+        limit,
+        raw: true,
+      });
+
+      console.log(data);
+
+      for (let d of data) {
+        d.image = urlConstants.IMG_PATH_URL + d.image;
+        console.log(d.image);
+      }
+
+      res.json(data);
+    } catch (error) {
+      res.jscon({success:false, message: error});
+    }
   }
-  
- 
-
-
 }
